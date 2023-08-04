@@ -371,7 +371,7 @@ public class ConsumerBuilderImplTest {
         assertFalse(consumerBuilder.getConf().getDeadLetterPolicy().isDeadLetterBatchingEnabled());
         assertFalse(consumerBuilder.getConf().getDeadLetterPolicy().isDeadLetterChunkingEnabled());
         assertTrue(consumerBuilder.getConf().getDeadLetterPolicy().isRetryLetterBatchingEnabled());
-        assertTrue(consumerBuilder.getConf().getDeadLetterPolicy().isRetryLetterBatchingEnabled());
+        assertTrue(consumerBuilder.getConf().getDeadLetterPolicy().isRetryLetterChunkingEnabled());
     }
 
     @Test
@@ -525,7 +525,7 @@ public class ConsumerBuilderImplTest {
         assertTrue(configurationData.getDeadLetterPolicy().isDeadLetterBatchingEnabled());
         assertFalse(configurationData.getDeadLetterPolicy().isDeadLetterChunkingEnabled());
         assertFalse(configurationData.getDeadLetterPolicy().isRetryLetterBatchingEnabled());
-        assertFalse(configurationData.getDeadLetterPolicy().isRetryLetterBatchingEnabled());
+        assertFalse(configurationData.getDeadLetterPolicy().isRetryLetterChunkingEnabled());
         assertTrue(configurationData.isRetryEnable());
         assertFalse(configurationData.isAutoUpdatePartitions());
         assertEquals(configurationData.getAutoUpdatePartitionsIntervalSeconds(), 2);
