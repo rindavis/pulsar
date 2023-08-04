@@ -48,10 +48,22 @@ public class DeadLetterPolicy {
      */
     private String retryLetterTopic;
 
+    @Builder.Default
+    private boolean retryLetterChunkingEnabled = false;
+
+    @Builder.Default
+    private boolean retryLetterBatchingEnabled = false;
+
     /**
      * Name of the dead topic where the failing messages will be sent.
      */
     private String deadLetterTopic;
+
+    @Builder.Default
+    private boolean deadLetterChunkingEnabled = false;
+
+    @Builder.Default
+    private boolean deadLetterBatchingEnabled = true;
 
     /**
      * Name of the initial subscription name of the dead letter topic.
