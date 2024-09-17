@@ -19,6 +19,9 @@
 package org.apache.pulsar.client.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -347,6 +350,36 @@ public class ConsumerBuilderImplTest {
     }
 
     @Test
+    public void testNonNullDeadLetterPolicy() {
+        PulsarClientImpl client = mock(PulsarClientImpl.class);
+        ConsumerConfigurationData consumerConfigurationData = mock(ConsumerConfigurationData.class);
+        doCallRealMethod().when(consumerConfigurationData).setDeadLetterPolicy(any());
+        when(consumerConfigurationData.getDeadLetterPolicy()).thenCallRealMethod();
+        ConsumerBuilderImpl<byte[]> consumerBuilder = new ConsumerBuilderImpl(client, consumerConfigurationData, Schema.BYTES);
+
+        consumerBuilder.deadLetterPolicy(DeadLetterPolicy.builder()
+                .retryLetterTopic("new-retry")
+                .initialSubscriptionName("new-dlq-sub")
+                .deadLetterTopic("new-dlq")
+                .maxRedeliverCount(2)
+                .deadLetterBatchingEnabled(false)
+                .deadLetterChunkingEnabled(true)
+                .retryLetterBatchingEnabled(true)
+                .retryLetterChunkingEnabled(false)
+                .build());
+        verify(consumerBuilder.getConf()).setDeadLetterPolicy(notNull());
+        DeadLetterPolicy policy = consumerBuilder.getConf().getDeadLetterPolicy();
+        assertThat(policy.getRetryLetterTopic()).isEqualTo("new-retry");
+        assertThat(policy.getInitialSubscriptionName()).isEqualTo("new-dlq-sub");
+        assertThat(policy.getDeadLetterTopic()).isEqualTo("new-dlq");
+        assertThat(policy.getMaxRedeliverCount()).isEqualTo(2);
+        assertFalse(policy.isDeadLetterBatchingEnabled());
+        assertTrue(policy.isDeadLetterChunkingEnabled());
+        assertTrue(policy.isRetryLetterBatchingEnabled());
+        assertFalse(policy.isRetryLetterChunkingEnabled());
+    }
+
+    @Test
     public void testConsumerBuilderImplWhenNumericPropertiesAreValid() {
         consumerBuilderImpl.negativeAckRedeliveryDelay(1, TimeUnit.MILLISECONDS);
         consumerBuilderImpl.priorityLevel(1);
@@ -494,6 +527,10 @@ public class ConsumerBuilderImplTest {
         assertEquals(configurationData.getDeadLetterPolicy().getRetryLetterTopic(), "new-retry");
         assertEquals(configurationData.getDeadLetterPolicy().getInitialSubscriptionName(), "new-dlq-sub");
         assertEquals(configurationData.getDeadLetterPolicy().getMaxRedeliverCount(), 2);
+        assertTrue(configurationData.getDeadLetterPolicy().isDeadLetterBatchingEnabled());
+        assertFalse(configurationData.getDeadLetterPolicy().isDeadLetterChunkingEnabled());
+        assertFalse(configurationData.getDeadLetterPolicy().isRetryLetterBatchingEnabled());
+        assertFalse(configurationData.getDeadLetterPolicy().isRetryLetterChunkingEnabled());
         assertTrue(configurationData.isRetryEnable());
         assertFalse(configurationData.isAutoUpdatePartitions());
         assertEquals(configurationData.getAutoUpdatePartitionsIntervalSeconds(), 2);
